@@ -39,16 +39,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.rememberAsyncImagePainter
 import com.machado001.packagemanagerinteractor.data.AndroidPackageRepository
 import com.machado001.packagemanagerinteractor.presentation.HomeViewModel
 import com.machado001.packagemanagerinteractor.ui.theme.PackageManagerInteractionTheme
-import kotlin.math.log
 
-
-val Any.TAG get() = this.javaClass.simpleName
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +59,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = { TopAppBar() }) { innerPadding ->
                     MainScreenRoot(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .padding(innerPadding)
                             .height(IntrinsicSize.Min)
                     )
                 }
@@ -84,19 +84,16 @@ fun MainScreenRoot(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val viewModel = HomeViewModel(AndroidPackageRepository(context.packageManager))
 
-    MainScreen(
-        modifier,
-        viewModel = viewModel,
-    )
+    MainScreen(modifier, viewModel = viewModel,)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel,
+    viewModel: HomeViewModel = viewModel(),
 ) {
-    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val packagesFilteredFromSearch by viewModel.searchResults.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
 
     SearchBar(
@@ -128,15 +125,16 @@ fun MainScreen(
         onActiveChange = {},
         tonalElevation = 4.dp
     ) {
-        if (searchResults.isEmpty()) {
+
+        if (packagesFilteredFromSearch.isEmpty()) {
             EmptyPackageListAfterSearchColumn()
         } else {
             LazyColumn {
                 items(
-                    count = searchResults.size,
-                    key = { index -> searchResults[index].packageName }) { index ->
-                    searchResults[index].apply {
-                        PackageInfoItem(packageName = packageName, versionName = versionName)
+                    count = packagesFilteredFromSearch.size,
+                    key = { index -> packagesFilteredFromSearch[index].name }) { index ->
+                    packagesFilteredFromSearch[index].apply {
+                        PackageInfoItem(packageName = name, versionName = version)
                     }
 
                     Spacer(modifier = Modifier.padding(bottom = 4.dp))
@@ -201,12 +199,10 @@ fun PackageInfoItem(modifier: Modifier = Modifier, packageName: String, versionN
 }
 
 
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    PackageManagerInteractorTheme {
-//        MainScreen(
-//            mainState = MainScreenUiState()
-//        )
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    PackageManagerInteractionTheme {
+        MainScreen()
+    }
+}
