@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">packageManagerInteractor</string>
+    <string name="search_package_name">Search package name</string>
+    <string name="clear_search">Clear search</string>
+    <string name="no_packages_found">No packages found</string>
+</resources>
