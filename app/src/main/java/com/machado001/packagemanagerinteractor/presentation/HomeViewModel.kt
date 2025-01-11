@@ -1,12 +1,12 @@
 package com.machado001.packagemanagerinteractor.presentation
 
-import android.content.pm.PackageInfo
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.machado001.packagemanagerinteractor.domain.Package
 import com.machado001.packagemanagerinteractor.domain.PackageRepository
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
@@ -18,11 +18,11 @@ class HomeViewModel(repository: PackageRepository) : ViewModel() {
     var searchQuery by mutableStateOf("")
         private set
 
-    val searchResults: StateFlow<List<PackageInfo>> = snapshotFlow { searchQuery }
+    val searchResults: StateFlow<List<Package>> = snapshotFlow { searchQuery }
         .combine(repository.packageInfos) { query, packages ->
             if (searchQuery.isNotEmpty()) {
-                packages.filter { packageInfo ->
-                    packageInfo.packageName.contains(query, ignoreCase = true)
+                packages.filter { pkg ->
+                    pkg.name.contains(query, ignoreCase = true)
                 }
             } else packages
         }
