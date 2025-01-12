@@ -20,15 +20,14 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -61,7 +60,6 @@ class MainActivity : ComponentActivity() {
                     MainScreenRoot(
                         modifier = Modifier
                             .padding(innerPadding)
-                            .height(IntrinsicSize.Min)
                     )
                 }
             }
@@ -84,10 +82,9 @@ fun MainScreenRoot(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val viewModel = HomeViewModel(AndroidPackageRepository(context.packageManager))
 
-    MainScreen(modifier, viewModel = viewModel,)
+    MainScreen(modifier, viewModel = viewModel)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
@@ -96,36 +93,26 @@ fun MainScreen(
     val packagesFilteredFromSearch by viewModel.searchResults.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    SearchBar(
-        query = viewModel.searchQuery,
-        onQueryChange = viewModel::onSearch,
-        onSearch = { keyboardController?.hide() },
-        placeholder = {
-            Text(text = stringResource(R.string.search_package_name))
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                tint = MaterialTheme.colorScheme.onSurface,
-                contentDescription = null
-            )
-        },
-        trailingIcon = {
-            if (viewModel.searchQuery.isNotEmpty()) {
-                IconButton(onClick = { viewModel.onSearch("") }) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription = stringResource(R.string.clear_search)
-                    )
+    Column(modifier = modifier.fillMaxSize()) {
+        TextField(
+            modifier = modifier.fillMaxWidth(),
+            value = viewModel.searchQuery,
+            onValueChange = viewModel::onSearch,
+            trailingIcon = {
+                if (viewModel.searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.onSearch("") }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = stringResource(R.string.clear_search)
+                        )
+                    }
                 }
-            }
-        },
-        active = true,
-        onActiveChange = {},
-        tonalElevation = 4.dp
-    ) {
-
+            },
+            placeholder = {
+                Text(text = stringResource(R.string.search_package_name))
+            },
+        )
         if (packagesFilteredFromSearch.isEmpty()) {
             EmptyPackageListAfterSearchColumn()
         } else {
